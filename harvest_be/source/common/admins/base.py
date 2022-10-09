@@ -1,8 +1,7 @@
-from autocomplete_all import autocomplete_all
 from django.contrib import admin
 
 
-class TrackingModelAdmin(autocomplete_all.ModelAdmin):
+class TrackingModelAdmin(admin.ModelAdmin):
     readonly_fields = [
         'id',
     ]
