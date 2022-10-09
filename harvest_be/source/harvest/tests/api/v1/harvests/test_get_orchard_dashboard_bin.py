@@ -11,7 +11,7 @@ from user.tests.factories.user import UserFactory
 pytestmark = pytest.mark.django_db
 
 
-GROUP_BY = 'variety'
+GROUP_BY = 'orchard'
 METRIC = 'bin'
 
 
@@ -24,6 +24,7 @@ def harvest_data():
     user = UserFactory(id='5e035584-218f-41ad-bb99-5d2e3c8d7215')
     orchard = OrchardFactory(
         id='-MThSwo4wzyvSPUGdM6h',
+        name='Cypress',
     )
     variety = VarietyFactory(
         id='-M2StWPdhrsVWZjWluBD',
@@ -41,7 +42,10 @@ def harvest_data():
 
     # harvest 2
     user = UserFactory(id='334a3eb7-d7bd-40cc-ac5e-801a96703453')
-    orchard = OrchardFactory(id='-MThSwo4wzyvSPUGdM6h')
+    orchard = OrchardFactory(
+        id='-MThSwo4wzyvSPUGdM6h',
+        name='Cypress',
+    )
     variety = VarietyFactory(
         id='-M2StWPW7APCf0Jn3ew0',
         name='Galaxy'
@@ -58,7 +62,10 @@ def harvest_data():
 
     # harvest 3
     user = UserFactory(id='e153ce3f-127e-446b-a328-0ebea2c706d8')
-    orchard = OrchardFactory(id='-MThSwo4wzyvSPUGdM6h')
+    orchard = OrchardFactory(
+        id='-MThSwo4wzyvSPUGdM6h',
+        name='Cypress',
+    )
     variety = VarietyFactory(
         id='-M2StWPW7APCf0Jn3ew0',
         name='Galaxy'
@@ -75,7 +82,10 @@ def harvest_data():
 
     # harvest 4
     user = UserFactory(id='e3e22388-fd57-42ed-ac8d-7cdf70d04ed1')
-    orchard = OrchardFactory(id='-MThT6k5FHYORAhs0klw')
+    orchard = OrchardFactory(
+        id='-MThT6k5FHYORAhs0klw',
+        name='Benner Road',
+    )
     variety = VarietyFactory(
         id='-M2StWPil_OVo67-CUm-',
         name='Royal Gala'
@@ -92,7 +102,10 @@ def harvest_data():
 
     # harvest 5
     user = UserFactory(id='81ef66d4-80e6-46f9-bf1b-d40408b0ed52')
-    orchard = OrchardFactory(id='-MThSwo4wzyvSPUGdM6h')
+    orchard = OrchardFactory(
+        id='-MThSwo4wzyvSPUGdM6h',
+        name='Cypress',
+    )
     variety = VarietyFactory(
         id='-M2StWPW7APCf0Jn3ew0',
         name='Galaxy'
@@ -196,26 +209,16 @@ def test_success__date_range_has_partial_data(
 
     # assert
     assert res.status_code == 200
-    assert len(data) == 2
+    assert len(data) == 1
 
-    # assert pink lady data
-    pink_lady_data = [
+    # assert cypress data
+    cypress_data = [
         item for item in data
-        if item['name'] == 'Pink Lady'
+        if item['name'] == 'Cypress'
     ]
-    assert len(pink_lady_data) == 1
-    pink_lady_data = pink_lady_data[0]
-    assert pink_lady_data['value'] == 16
-
-
-    # assert galaxy data
-    galaxy_data = [
-        item for item in data
-        if item['name'] == 'Galaxy'
-    ]
-    assert len(galaxy_data) == 1
-    galaxy_data = galaxy_data[0]
-    assert galaxy_data['value'] == 16
+    assert len(cypress_data) == 1
+    cypress_data = cypress_data[0]
+    assert cypress_data['value'] == 32
 
 
 def test_success__date_range_has_full_data(
@@ -245,34 +248,25 @@ def test_success__date_range_has_full_data(
 
     # assert
     assert res.status_code == 200
-    assert len(data) == 3
+    assert len(data) == 2
 
-    # assert pink lady data
-    pink_lady_data = [
+    # assert cypress data
+    cypress_data = [
         item for item in data
-        if item['name'] == 'Pink Lady'
+        if item['name'] == 'Cypress'
     ]
-    assert len(pink_lady_data) == 1
-    pink_lady_data = pink_lady_data[0]
-    assert pink_lady_data['value'] == 16
+    assert len(cypress_data) == 1
+    cypress_data = cypress_data[0]
+    assert cypress_data['value'] == 36
 
-    # assert galaxy data
-    galaxy_data = [
+    # assert benner road data
+    benner_road_data = [
         item for item in data
-        if item['name'] == 'Galaxy'
+        if item['name'] == 'Benner Road'
     ]
-    assert len(galaxy_data) == 1
-    galaxy_data = galaxy_data[0]
-    assert galaxy_data['value'] == 20
-
-    # assert royal gala data
-    royal_gala_data = [
-        item for item in data
-        if item['name'] == 'Royal Gala'
-    ]
-    assert len(royal_gala_data) == 1
-    royal_gala_data = royal_gala_data[0]
-    assert royal_gala_data['value'] == 11
+    assert len(benner_road_data) == 1
+    benner_road_data = benner_road_data[0]
+    assert benner_road_data['value'] == 11
 
 
 def test_success__date_range_has_full_data__filtered_orchard_has_no_data(

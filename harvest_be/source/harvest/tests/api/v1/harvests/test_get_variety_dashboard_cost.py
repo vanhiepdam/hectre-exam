@@ -12,7 +12,7 @@ pytestmark = pytest.mark.django_db
 
 
 GROUP_BY = 'variety'
-METRIC = 'bin'
+METRIC = 'cost'
 
 
 @pytest.fixture
@@ -205,7 +205,7 @@ def test_success__date_range_has_partial_data(
     ]
     assert len(pink_lady_data) == 1
     pink_lady_data = pink_lady_data[0]
-    assert pink_lady_data['value'] == 16
+    assert pink_lady_data['value'] == Decimal("42.36") * Decimal("7.9")
 
 
     # assert galaxy data
@@ -215,7 +215,10 @@ def test_success__date_range_has_partial_data(
     ]
     assert len(galaxy_data) == 1
     galaxy_data = galaxy_data[0]
-    assert galaxy_data['value'] == 16
+    assert galaxy_data['value'] == (
+            Decimal("76.63") * Decimal("1.4") +
+            Decimal("70.09") * Decimal("6.1")
+    )
 
 
 def test_success__date_range_has_full_data(
@@ -254,7 +257,7 @@ def test_success__date_range_has_full_data(
     ]
     assert len(pink_lady_data) == 1
     pink_lady_data = pink_lady_data[0]
-    assert pink_lady_data['value'] == 16
+    assert pink_lady_data['value'] == Decimal("42.36") * Decimal("7.9")
 
     # assert galaxy data
     galaxy_data = [
@@ -263,7 +266,11 @@ def test_success__date_range_has_full_data(
     ]
     assert len(galaxy_data) == 1
     galaxy_data = galaxy_data[0]
-    assert galaxy_data['value'] == 20
+    assert galaxy_data['value'] == (
+            Decimal("76.63") * Decimal("1.4") +
+            Decimal("70.09") * Decimal("6.1") +
+            Decimal("42.67") * Decimal("6.4")
+    )
 
     # assert royal gala data
     royal_gala_data = [
@@ -272,7 +279,9 @@ def test_success__date_range_has_full_data(
     ]
     assert len(royal_gala_data) == 1
     royal_gala_data = royal_gala_data[0]
-    assert royal_gala_data['value'] == 11
+    assert royal_gala_data['value'] == (
+            Decimal("45.15") * Decimal("5.7")
+    )
 
 
 def test_success__date_range_has_full_data__filtered_orchard_has_no_data(
@@ -303,63 +312,3 @@ def test_success__date_range_has_full_data__filtered_orchard_has_no_data(
     # assert
     assert res.status_code == 200
     assert len(data) == 0
-
-
-def test_failure__group_by_not_valid(
-        harvest_data,
-        api_client
-):
-    # arrange params
-    start = '2021-05-01T00:00:00Z'
-    end = '2021-06-30T00:00:00Z'
-    orchard_ids = ''
-
-    # arrange payload
-    url = '/api/v1/harvests/dashboard/?group_by={}&orchard_ids={}&start_time={}&end_time={}&metric={}'.format(
-        'binn',
-        orchard_ids,
-        start,
-        end,
-        METRIC
-    )
-
-    # action
-    res = api_client.get(
-        url,
-        content_type='application/json',
-    )
-    data = res.data
-
-    # assert
-    assert res.status_code == 400
-    assert data['messages'][0] == '"binn" is not a valid choice.'
-
-
-def test_failure__metric_not_valid(
-        harvest_data,
-        api_client
-):
-    # arrange params
-    start = '2021-05-01T00:00:00Z'
-    end = '2021-06-30T00:00:00Z'
-    orchard_ids = ''
-
-    # arrange payload
-    url = '/api/v1/harvests/dashboard/?group_by={}&orchard_ids={}&start_time={}&end_time={}&metric={}'.format(
-        GROUP_BY,
-        orchard_ids,
-        start,
-        end,
-        'variety'
-    )
-
-    # action
-    res = api_client.get(
-        url,
-        content_type='application/json',
-    )
-    data = res.data
-
-    # assert
-    assert res.status_code == 400
-    assert data['messages'][0] == '"variety" is not a valid choice.'
