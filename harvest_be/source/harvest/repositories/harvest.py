@@ -19,42 +19,29 @@ class HarvestRepository(BaseRepository):
     model = Harvest
 
     @classmethod
-    def find_raw_data_for_dashboard(
+    def aggregate_data_for_dashboard(
             cls,
             start_time: datetime,
             end_time: datetime,
-            orchards: Optional[Iterable[Orchard]]
+            group_by: Union[str, DashboardGroupBy],
+            metric: Union[str, DashboardMetric],
+            orchards: Optional[Iterable[Orchard]] = None,
     ) -> QuerySet:
-        queryset = cls.model.objects.filter(
+        # get raw data
+        raw_data = cls.model.objects.filter(
             picking_time__gte=start_time,
             picking_time__lte=end_time,
         )
 
         if orchards is not None:
-            queryset = queryset.filter(
+            raw_data = raw_data.filter(
                 orchard__in=orchards
             )
 
-        queryset = queryset.select_related(
+        raw_data = raw_data.select_related(
             'user',
             'orchard',
             'variety',
-        )
-        return queryset
-
-    @classmethod
-    def aggregate_data_for_dashboard(
-            cls,
-            start_time: datetime,
-            end_time: datetime,
-            orchards: Optional[Iterable[Orchard]],
-            group_by: Union[str, DashboardGroupBy],
-            metric: Union[str, DashboardMetric]
-    ) -> QuerySet:
-        raw_data = cls.find_raw_data_for_dashboard(
-            start_time=start_time,
-            end_time=end_time,
-            orchards=orchards,
         )
 
         # set aggregate metric
@@ -65,7 +52,9 @@ class HarvestRepository(BaseRepository):
         else:
             aggregate_metric = metric
 
-        data = raw_data.values(gid=F(f'{group_by}__id'), name=F(f'{group_by}__name')).annotate(
-            value=Sum(aggregate_metric)
+        # aggregate data
+        data = raw_data.values(gid=F(f'{group_by}__id')).annotate(
+            value=Sum(aggregate_metric),
+            name=F(f'{group_by}__name')
         )
         return data
