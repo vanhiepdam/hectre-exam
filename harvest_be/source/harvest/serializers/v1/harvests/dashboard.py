@@ -8,6 +8,12 @@ from harvest.repositories.orchard import OrchardRepository
 from harvest.services.harvests.generate_dashboard_v1 import GenerateDashboardServiceV1
 
 
+class GenerateDashboardResponseSerializerV1(serializers.Serializer):
+    gid = serializers.CharField()
+    name = serializers.CharField()
+    value = serializers.FloatField()
+
+
 class GenerateDashboardSerializerV1(ProcessSerializer):
     orchard_ids = serializers.CharField(allow_blank=True)
     start_time = serializers.DateTimeField()

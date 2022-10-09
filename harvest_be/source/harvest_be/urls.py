@@ -16,8 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include
 from django.urls import path
+from drf_spectacular.views import SpectacularJSONAPIView
+from drf_spectacular.views import SpectacularSwaggerView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
+    path('api/schema/', SpectacularJSONAPIView.as_view(), name='schema'),
+    path('api-doc/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/v1/', include('harvest_be.urls_api_v1')),
 ]

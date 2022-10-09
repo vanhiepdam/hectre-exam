@@ -42,6 +42,8 @@ INSTALLED_APPS = [
 
     # 3rd parties
     'rest_framework',
+    'drf_spectacular',
+    'corsheaders',
 
     # my apps
     'user',
@@ -142,7 +144,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+    'DEFAULT_SCHEMA_CLASS': 'harvest_be.open_api.MyAutoSchema',
     "UNAUTHENTICATED_USER": None,
     'EXCEPTION_HANDLER': 'harvest_be.api_exception_handler.drf_exception_handler',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Hectre Exam APIs',
+    'DESCRIPTION': 'Hectre Exam',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }

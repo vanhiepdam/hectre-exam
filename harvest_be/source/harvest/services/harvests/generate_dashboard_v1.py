@@ -18,7 +18,7 @@ class GenerateDashboardServiceV1:
             orchards: Optional[List[Orchard]],
             metric: str,
             group_by: str
-    ) -> List:
+    ):
         self.start_time = start_time
         self.end_time = end_time
         self.orchards = orchards
@@ -31,7 +31,7 @@ class GenerateDashboardServiceV1:
         if self.group_by not in DashboardGroupBy.values():
             raise BusinessLogicValidationError(f"{self.group_by} is not supported.")
 
-    def generate(self):
+    def generate(self) -> List:
         self._validate()
         data = HarvestRepository.aggregate_data_for_dashboard(
             start_time=self.start_time,
