@@ -6,7 +6,7 @@ from common.rest_framework.mixins import ProcessModelMixin
 from harvest.serializers.v1.harvests.dashboard import DashboardSerializerV1
 
 
-class HarvestViewset(
+class HarvestViewsetV1(
     GenericViewSet,
     ProcessModelMixin
 ):
