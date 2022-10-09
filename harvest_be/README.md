@@ -1,4 +1,4 @@
-# hectre-exam
+# hectre-backend
 
 ## Run script to populate data to db
 ```
