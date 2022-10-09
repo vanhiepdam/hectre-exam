@@ -10,3 +10,6 @@ python scripts/setup_data/populate_data_to_db.py
 
 ## Notes
 The timezone is used in this project is UTC+0.
+
+## Api Doc
+http://{SERVER_IP}/api-doc/
