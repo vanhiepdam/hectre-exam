@@ -26,9 +26,7 @@ services:
         tty: true
         depends_on:
             - postgres
-        links:
-            - postgres
-        networks:
+`        networks:
             - django_net
         command:
             - /bin/bash
