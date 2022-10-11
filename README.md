@@ -13,6 +13,18 @@
 
 6. No https
 
+### git & CI & CD workflow 
+1. "main" is the protected branch
+2. devs fork new branch to develop their feature
+3. devs create PR in order to be merged to "main"
+4. Setup 2 github action: CI, Deploy
+5. Every push on the branches of open pull requests, Action "CI" will run unit tests and response the result
+6. Every merge on branch "main", action "Deploy" will run to deploy new source code
+
+Note: In this example, my action "Deploy" will ssh to the server contains source code and run script to deploy
+
+Now it always be failed because it has no credentials to ssh to server 
+
 # Deployment
 
 ## Setup backend
