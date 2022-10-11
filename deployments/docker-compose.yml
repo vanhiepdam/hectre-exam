@@ -1,0 +1,64 @@
+version: "3"
+
+services:
+    postgres:
+        image: postgres:14.4
+        volumes:
+            - ../harvest_be/data/postgres/:/var/lib/postgresql/data
+        env_file:
+            - ../harvest_be/.env
+        networks:
+            - django_net
+
+    backend:
+        build:
+            context: ../harvest_be
+            args:
+                - ENV=dev
+        environment:
+            - DJANGO_SETTINGS_MODULE=harvest_be.settings.dev
+        volumes:
+            - ../harvest_be:/code
+        env_file:
+            - ../harvest_be/.env
+        tty: true
+        depends_on:
+            - postgres
+        networks:
+            - django_net
+        command:
+            - /bin/bash
+            - -c
+            - |
+                cd source
+                sleep 2
+                python manage.py migrate
+                python manage.py collectstatic --noinput
+                python manage.py runserver 0.0.0.0:8000
+
+    dashboard:
+        build: ../harvest_dashboard
+        depends_on:
+          - backend
+        env_file:
+            - ../harvest_dashboard/.env.prod
+        networks:
+            - django_net
+        command:
+            - /bin/bash
+            - -c
+            - npm run start-production
+
+    nginx:
+        build: ../nginx
+        ports:
+            - 80:80
+        depends_on:
+            - backend
+            - dashboard
+        networks:
+            - django_net
+
+networks:
+    django_net:
+        driver: bridge
