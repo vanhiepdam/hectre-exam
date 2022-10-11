@@ -18,7 +18,7 @@ class PieChart extends React.Component {
   fetchData() {
     const startTimeStr = this.props.startTime.utc().format();
     const endTimeStr = this.props.endTime.utc().format();
-    const url = `http://localhost:8000/api/v1/harvests/dashboard/?start_time=${startTimeStr}&end_time=${endTimeStr}&orchard_ids=${this.props.orchardIds}&group_by=${this.props.groupBy}&metric=${this.props.metric}`
+    const url = `${process.env.REACT_APP_BASE_API_URL}/api/v1/harvests/dashboard/?start_time=${startTimeStr}&end_time=${endTimeStr}&orchard_ids=${this.props.orchardIds}&group_by=${this.props.groupBy}&metric=${this.props.metric}`
     fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ class PieChart extends React.Component {
   getTotalDisplay = () => {
     let total = ''
     let metric = ''
-    if (this.props.metric == 'bin') {
+    if (this.props.metric === 'bin') {
       total = this.state.total.toLocaleString()
       metric = 'bins'
     }
@@ -190,7 +190,7 @@ class PieChart extends React.Component {
 
           let total = ''
           let metric = ''
-          if (this.props.metric == 'bin') {
+          if (this.props.metric === 'bin') {
             total = context.tooltip.dataPoints[0].formattedValue + '&nbsp';
             metric = 'bins';
           }
@@ -259,7 +259,7 @@ class PieChart extends React.Component {
       },
     }
 
-    if (this.state.datasets.length == 0) {
+    if (this.state.datasets.length === 0) {
       return (
         <div>No data available</div>
       )

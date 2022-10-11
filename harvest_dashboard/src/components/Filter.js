@@ -59,7 +59,7 @@ class Filter extends React.Component {
   }
 
   componentDidMount() {
-    const url = `http://localhost:8000/api/v1/orchards/`
+    const url = `${process.env.REACT_APP_BASE_API_URL}/api/v1/orchards/`
     fetch(url, {
       headers: {
         'Content-Type': 'application/json',
