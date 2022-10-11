@@ -2,6 +2,7 @@ import React from 'react'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { Pie } from 'react-chartjs-2';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import moment from 'moment';
 
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
@@ -14,8 +15,10 @@ class PieChart extends React.Component {
     total: 0,
   }
 
-  componentDidMount() {
-    const url = `http://localhost:8000/api/v1/harvests/dashboard/?start_time=${this.props.startTime}&end_time=${this.props.endTime}&orchard_ids=${this.props.orchardIds}&group_by=${this.props.groupBy}&metric=${this.props.metric}`
+  fetchData() {
+    const startTimeStr = this.props.startTime.utc().format();
+    const endTimeStr = this.props.endTime.utc().format();
+    const url = `http://localhost:8000/api/v1/harvests/dashboard/?start_time=${startTimeStr}&end_time=${endTimeStr}&orchard_ids=${this.props.orchardIds}&group_by=${this.props.groupBy}&metric=${this.props.metric}`
     fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -48,6 +51,34 @@ class PieChart extends React.Component {
       })
   }
 
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.startTime !== this.props.startTime ||
+      prevProps.endTime !== this.props.endTime ||
+      prevProps.orchardIds !== this.props.orchardIds ||
+      prevProps.groupBy !== this.props.groupBy
+    ) {
+      this.fetchData();
+    }
+  }
+
+  getTotalDisplay = () => {
+    let total = ''
+    let metric = ''
+    if (this.props.metric == 'bin') {
+      total = this.state.total.toLocaleString()
+      metric = 'bins'
+    }
+    else {
+      total = '$' + this.state.total.toLocaleString()
+      metric = ''
+    }
+    return `${total} ${metric}`
+  }
+
   render() {
     const data = {
       labels: this.state.labels,
@@ -61,10 +92,11 @@ class PieChart extends React.Component {
     };
 
     const getOrCreateTooltip = (chart) => {
-      let tooltipEl = chart.canvas.parentNode.querySelector('div');
-    
+      let tooltipEl = chart.canvas.parentNode.querySelector('#tooltipEl');
+
       if (!tooltipEl) {
         tooltipEl = document.createElement('div');
+        tooltipEl.setAttribute('id', 'tooltipEl');
         tooltipEl.style.background = 'rgba(0, 0, 0, 0.7)';
         tooltipEl.style.borderRadius = '3px';
         tooltipEl.style.color = 'white';
@@ -73,22 +105,22 @@ class PieChart extends React.Component {
         tooltipEl.style.position = 'absolute';
         tooltipEl.style.transform = 'translate(-50%, 0)';
         tooltipEl.style.transition = 'all .1s ease';
-    
+
         const table = document.createElement('table');
         table.style.margin = '0px';
-    
+
         tooltipEl.appendChild(table);
         chart.canvas.parentNode.appendChild(tooltipEl);
       }
-    
+
       return tooltipEl;
     };
-    
+
     const externalTooltipHandler = (context) => {
       // Tooltip Element
-      const {chart, tooltip} = context;
+      const { chart, tooltip } = context;
       const tooltipEl = getOrCreateTooltip(chart);
-    
+
       // Hide if no tooltip
       if (tooltip.opacity === 0) {
         tooltipEl.style.opacity = 0;
@@ -99,24 +131,26 @@ class PieChart extends React.Component {
         const titleLines = tooltip.title || [];
         const bodyLines = tooltip.body.map(b => b.lines);
         const tableHead = document.createElement('thead');
-    
+
         titleLines.forEach(title => {
           const tr = document.createElement('tr');
           tr.style.borderWidth = 0;
-    
+
           const th = document.createElement('th');
           th.style.borderWidth = 0;
           const text = document.createTextNode(title);
-    
+
           th.appendChild(text);
           tr.appendChild(th);
           tableHead.appendChild(tr);
         });
-    
+
         const tableBody = document.createElement('tbody');
         bodyLines.forEach((body, i) => {
           // add date time filter
-          let text = document.createTextNode(this.props.startTime + ' - ' + this.props.endTime);
+          let text = document.createTextNode(
+            moment(this.props.startTime).format('DD/MM/YYYY') + ' - ' + moment(this.props.endTime).format('DD/MM/YYYY')
+          );
           let tr = document.createElement('tr');
           tr.style.backgroundColor = 'inherit';
           tr.style.borderWidth = 0;
@@ -124,11 +158,11 @@ class PieChart extends React.Component {
           td.appendChild(text);
           tr.appendChild(td);
           tableBody.appendChild(tr);
-          
+
           // add data detail
           td = document.createElement('td');
           td.style.borderWidth = 0;
-          
+
           let container = document.createElement("div");
           // container.style.display = 'flex';
 
@@ -143,23 +177,35 @@ class PieChart extends React.Component {
           container.appendChild(name_div);
 
           let value_div = document.createElement('div');
-          value_div.style.marginLeft = '50px';
+          value_div.style.marginLeft = '20px';
           value_div.style.background = '#fff';
           value_div.style.height = '20px';
           value_div.style.marginTop = '20px';
           value_div.style.marginBottom = '5px';
           value_div.style.display = 'inline-block';
           let span = document.createElement('span');
-          text = document.createTextNode(context.tooltip.dataPoints[0].formattedValue);
+          text = document.createTextNode("");
           span.appendChild(text);
           span.style.color = '#DF1D00';
+
+          let total = ''
+          let metric = ''
+          if (this.props.metric == 'bin') {
+            total = context.tooltip.dataPoints[0].formattedValue + '&nbsp';
+            metric = 'bins';
+          }
+          else {
+            total = '$' + context.tooltip.dataPoints[0].formattedValue + '&nbsp';
+            metric = '';
+          }
+          span.innerHTML = total;
           value_div.appendChild(span);
           span = document.createElement('span');
-          text = document.createTextNode(this.props.metric + 's');
+          text = document.createTextNode(metric);
           span.appendChild(text);
           value_div.appendChild(span);
           container.appendChild(value_div);
-          
+
           td.appendChild(container);
           tr = document.createElement('tr');
           tr.style.backgroundColor = 'inherit';
@@ -167,21 +213,23 @@ class PieChart extends React.Component {
           tr.appendChild(td);
           tableBody.appendChild(tr);
         });
-    
+
         const tableRoot = tooltipEl.querySelector('table');
-    
-        // Remove old children
-        while (tableRoot.firstChild) {
-          tableRoot.firstChild.remove();
+
+        if (tableRoot) {
+          // Remove old children
+          while (tableRoot.firstChild) {
+            tableRoot.firstChild.remove();
+          }
+
+          // Add new children
+          tableRoot.appendChild(tableHead);
+          tableRoot.appendChild(tableBody);
         }
-    
-        // Add new children
-        tableRoot.appendChild(tableHead);
-        tableRoot.appendChild(tableBody);
       }
-    
-      const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
-    
+
+      const { offsetLeft: positionX, offsetTop: positionY } = chart.canvas;
+
       // Display, position, and set styles for font
       tooltipEl.style.opacity = 1;
       tooltipEl.style.left = positionX + tooltip.caretX + 'px';
@@ -191,7 +239,7 @@ class PieChart extends React.Component {
       tooltipEl.style.backgroundColor = '#fff';
       tooltipEl.style.color = '#000';
     };
-    
+
     const options = {
       plugins: {
         datalabels: {
@@ -208,15 +256,22 @@ class PieChart extends React.Component {
           position: 'nearest',
           external: externalTooltipHandler
         }
-      }
+      },
     }
-    return (
-      <div>
-        <Pie data={data} options={options} />
-        <div>{this.props.chartName}</div>
-        <div>TOTAL: {this.state.total} {this.props.metric}s</div>
-      </div>
-    )
+
+    if (this.state.datasets.length == 0) {
+      return (
+        <div>No data available</div>
+      )
+    } else {
+      return (
+        <div class="pie">
+          <Pie data={data} options={options} />
+          <div className="chartName">{this.props.chartName}</div>
+          <div className="total">TOTAL: {this.getTotalDisplay()}</div>
+        </div>
+      )
+    }
   }
 }
 
