@@ -265,7 +265,7 @@ class PieChart extends React.Component {
       )
     } else {
       return (
-        <div class="pie">
+        <div className="pie">
           <Pie data={data} options={options} />
           <div className="chartName">{this.props.chartName}</div>
           <div className="total">TOTAL: {this.getTotalDisplay()}</div>
