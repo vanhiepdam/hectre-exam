@@ -40,7 +40,7 @@ Now it always be failed because it has no credentials to ssh to server
     ```
     .env value
     ```
-    DJANGO_SETTINGS_MODULE=harvest_be.settings.local
+    DJANGO_SETTINGS_MODULE=harvest_be.settings.dev
     ALLOWED_HOSTS=127.0.0.1,localhost,nginx
     
     POSTGRES_DB=harvest
