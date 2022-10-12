@@ -13,6 +13,8 @@
 
 6. No https
 
+7. The legend of piechart is not correct with design but I have solution that the color for each variety and orchard can be configured in model at backend to response for user. I dont have enough time to do that.
+
 ### git & CI & CD workflow 
 1. "main" is the protected branch
 2. devs fork new branch to develop their feature
